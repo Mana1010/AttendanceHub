@@ -10,7 +10,7 @@ function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   return (
-    <div className=" absolute left-0 top-0 bottom-0 md:relative w-[300px] py-5 border-r-[1px] border-slate-300 z-20 bg-white h-full">
+    <div className="absolute left-0 top-0 bottom-0 md:relative w-[300px] py-5 border-r-[1px] border-slate-300 z-20 bg-white h-full">
       <Image
         src={sidebarBg}
         alt="sidebar-bg"
