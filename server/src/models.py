@@ -11,10 +11,10 @@ class User(models.Model):
     gender = models.CharField(max_length=10, blank=False)
     role = models.CharField(max_length=25, blank=False)
     reason = models.TextField(blank=False)
-    time_in = models.DateTimeField(blank=False)
+    qr_code = models.CharField(max_length=10, blank=False)
+    time_in = models.BigIntegerField(blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
-    
     
     class Meta:
         db_table = "users"

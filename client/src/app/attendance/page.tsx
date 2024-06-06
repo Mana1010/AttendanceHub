@@ -3,8 +3,10 @@ import React, { useState } from "react";
 import { FaUsers } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
 import AddUser from "@/components/AddUser";
+import { utilStore } from "@/store/utils.store";
+import { useQuery } from "@tanstack/react-query";
 function Attendance() {
-  const [openAddUser, setOpenAddUser] = useState<boolean>(false);
+  const { openAddUser, setOpenAddUser } = utilStore();
   return (
     <div className="w-full h-full flex flex-col relative">
       <header className="grid space-x-2 md:grid-cols-3 grid-cols-2 p-2">
@@ -17,7 +19,7 @@ function Attendance() {
         <div className="rounded-md py-2 px-5 border-zinc-300 border-[1px] h-[100px] flex space-x-2 flex-col items-center space-y-1">
           <h1 className="font-bold text-3xl text-[#374B65]">5</h1>
           <h3 className="text-[1rem] text-primary font-semibold">
-            TOTAL TIME IN
+            TOTAL ACTIVE USERS
           </h3>
         </div>
         <div className="rounded-md py-2 px-5 border-zinc-300 border-[1px] h-[100px] flex space-x-2 flex-col items-center space-y-1">
@@ -53,7 +55,7 @@ function Attendance() {
           </thead>
         </table>
       </div>
-      {openAddUser && <AddUser setOpenAddUser={setOpenAddUser} />}
+      {openAddUser && <AddUser />}
     </div>
   );
 }

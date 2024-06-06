@@ -1,5 +1,5 @@
 "use client";
-import React, { ChangeEvent, Dispatch, SetStateAction, useEffect } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,8 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 import { QueryClient } from "@tanstack/react-query";
+import { utilStore } from "@/store/utils.store";
+import GetCode from "./GetCode";
 const userSchema = z.object({
   lastname: z.string().min(1, "This field is required"),
   middlename: z.string().optional(),
@@ -21,17 +23,14 @@ const userSchema = z.object({
 });
 type UserSchema = z.infer<typeof userSchema>;
 const randomCode = randomString({ length: 5, numeric: true });
-function AddUser({
-  setOpenAddUser,
-}: {
-  setOpenAddUser: Dispatch<SetStateAction<boolean>>;
-}) {
+function AddUser() {
+  const [displayCode, setDisplayCode] = useState(false);
+  const { setCode, setName, setOpenAddUser } = utilStore();
   const {
     formState: { errors },
     register,
     reset,
     handleSubmit,
-    watch,
   } = useForm<UserSchema>({
     defaultValues: {
       lastname: "",
@@ -40,15 +39,15 @@ function AddUser({
       age: 1,
       gender: "Male",
       role: "Student",
+      reason: "",
     },
     resolver: zodResolver(userSchema),
   });
-  console.log(typeof watch("age"));
   const queryClient = new QueryClient();
   const timeInMutation = useMutation({
     mutationFn: async (data: UserSchema) => {
       const formData = new FormData();
-      const payload = { ...data, code: randomCode };
+      const payload = { ...data, code: randomCode, timeIn: Date.now() };
       for (let [key, value] of Object.entries(payload)) {
         formData.append(key, value.toString());
       }
@@ -65,9 +64,11 @@ function AddUser({
       return response.data;
     },
     onSuccess: (data) => {
-      console.log(data);
       queryClient.invalidateQueries();
-      toast.success("Successfully added a user");
+      setDisplayCode(true);
+      setCode(data.code);
+      setName(data.first_name);
+      toast.success(data.message);
       reset();
     },
     onError: (err: any) => {
@@ -87,7 +88,9 @@ function AddUser({
     <div className="inset-0 absolute bg-zinc-900/65 flex justify-center items-center w-full md:h-screen px-3">
       <form
         onSubmit={handleSubmit(addUser)}
-        className="w-full md:max-w-[800px] bg-white rounded-sm p-3 space-y-2 flex flex-col"
+        className={`w-full md:max-w-[800px] bg-white rounded-sm p-3 space-y-2 flex flex-col ${
+          displayCode && "hidden"
+        }`}
       >
         <h1 className="text-primary font-semibold text-xl">TIME IN</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-3">
@@ -214,7 +217,7 @@ function AddUser({
               <option value={"Student"} className="bg-slate-200 ">
                 Student
               </option>
-              <option value={"Working"} className="bg-slate-200 ">
+              <option value={"Staff"} className="bg-slate-200 ">
                 Staff
               </option>
               <option value={"Others"} className="bg-slate-200">
@@ -265,6 +268,7 @@ function AddUser({
           </button>
         </div>
       </form>
+      {displayCode && <GetCode />}
     </div>
   );
 }
