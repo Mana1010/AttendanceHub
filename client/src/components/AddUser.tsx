@@ -25,7 +25,7 @@ type UserSchema = z.infer<typeof userSchema>;
 const randomCode = randomString({ length: 5, numeric: true });
 function AddUser() {
   const [displayCode, setDisplayCode] = useState(false);
-  const { setCode, setName, setOpenAddUser } = utilStore();
+  const { setCode, setName, setOpenAddUser, openTimeInForm } = utilStore();
   const {
     formState: { errors },
     register,
@@ -54,12 +54,7 @@ function AddUser() {
 
       const response = await axios.post(
         "http://127.0.0.1:8000/add_user",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multimedia/parts",
-          },
-        }
+        formData
       );
       return response.data;
     },
@@ -80,12 +75,13 @@ function AddUser() {
       e.preventDefault();
     }
     window.addEventListener("beforeunload", loadFunc);
+    return () => window.removeEventListener("beforeunload", loadFunc);
   }, []);
   function addUser(data: UserSchema) {
     timeInMutation.mutate(data);
   }
   return (
-    <div className="inset-0 absolute bg-zinc-900/65 flex justify-center items-center w-full md:h-screen px-3">
+    <div className="w-full h-full flex justify-center items-center">
       <form
         onSubmit={handleSubmit(addUser)}
         className={`w-full md:max-w-[800px] bg-white rounded-sm p-3 space-y-2 flex flex-col ${
