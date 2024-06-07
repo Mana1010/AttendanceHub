@@ -64,6 +64,27 @@ function Sidebar() {
           </button>
         </nav>
       </div>
+      <small className="font-bold text-primary text-[0.7rem] px-2">
+        AUTHENTICATION
+      </small>
+      <nav className="flex flex-col items-center">
+        <button
+          onClick={() => router.push("/login")}
+          className={`p-3 flex space-x-2 items-center rounded-r-3xl  ${
+            pathname === "/login" && "text-white bg-primary"
+          } w-full text-[0.9rem]`}
+        >
+          LOGIN
+        </button>
+        <button
+          onClick={() => router.push("/register")}
+          className={`p-3 flex space-x-2 items-center rounded-r-3xl  ${
+            pathname === "/register" && "text-white bg-primary"
+          } w-full text-[0.9rem]`}
+        >
+          REGISTER
+        </button>
+      </nav>
     </div>
   );
 }

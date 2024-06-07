@@ -2,8 +2,10 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { utilStore } from "@/store/utils.store";
+import { useRouter } from "next/navigation";
 function GetCode() {
-  const { code, name, setCode, setName, setOpenAddUser } = utilStore();
+  const { code, name, setCode, setName } = utilStore();
+  const router = useRouter();
   return (
     <div className="w-[600px] rounded-md bg-white py-2 p-2">
       <div className="pb-2 space-y-2">
@@ -40,7 +42,8 @@ function GetCode() {
       <div className="w-full flex items-center justify-center mt-2">
         <button
           onClick={() => {
-            setCode(null), setName(null), setOpenAddUser(false);
+            router.push("/attendance");
+            setCode(null), setName(null);
           }}
           className="w-full md:w-1/2 bg-primary py-2.5 px-2 text-white rounded-md mx-auto"
         >

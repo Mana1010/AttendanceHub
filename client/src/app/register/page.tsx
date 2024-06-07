@@ -11,7 +11,8 @@ import axios from "axios";
 import { toast } from "sonner";
 import { QueryClient } from "@tanstack/react-query";
 import { utilStore } from "@/store/utils.store";
-import GetCode from "./GetCode";
+import { useRouter } from "next/navigation";
+import GetCode from "@/components/GetCode";
 const userSchema = z.object({
   lastname: z.string().min(1, "This field is required"),
   middlename: z.string().optional(),
@@ -23,9 +24,10 @@ const userSchema = z.object({
 });
 type UserSchema = z.infer<typeof userSchema>;
 const randomCode = randomString({ length: 5, numeric: true });
-function AddUser() {
+function Register() {
   const [displayCode, setDisplayCode] = useState(false);
-  const { setCode, setName, setOpenAddUser, openTimeInForm } = utilStore();
+  const { setCode, setName } = utilStore();
+  const router = useRouter();
   const {
     formState: { errors },
     register,
@@ -81,7 +83,7 @@ function AddUser() {
     timeInMutation.mutate(data);
   }
   return (
-    <div className="w-full h-full flex justify-center items-center">
+    <div className="w-full h-full flex justify-center items-center bg-primary">
       <form
         onSubmit={handleSubmit(addUser)}
         className={`w-full md:max-w-[800px] bg-white rounded-sm p-3 space-y-2 flex flex-col ${
@@ -244,7 +246,7 @@ function AddUser() {
         </div>
         <div className="w-full flex items-center justify-between">
           <button
-            onClick={() => setOpenAddUser(false)}
+            onClick={() => router.push("/login")}
             type="button"
             className="flex space-x-1 items-center py-2.5 px-3 bg-primary border-[1px] border-primary bg-transparent text-secondary justify-center"
           >
@@ -269,4 +271,4 @@ function AddUser() {
   );
 }
 
-export default AddUser;
+export default Register;

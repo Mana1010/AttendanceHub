@@ -1,11 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { utilStore } from "@/store/utils.store";
-import AddUser from "./AddUser";
 import { FaXmark } from "react-icons/fa6";
 import { useMutation } from "@tanstack/react-query";
-function TimeInForm() {
-  const { openAddUser, setOpenAddUser, setOpenTimeInForm } = utilStore();
+import { useRouter } from "next/navigation";
+function Login() {
+  const router = useRouter();
   const [code, setCode] = useState<string | null>(null);
 
   // useEffect(() => {
@@ -15,12 +14,11 @@ function TimeInForm() {
   //   window.addEventListener("beforeunload", loadFunc);
   //   return () => window.removeEventListener("beforeunload", loadFunc);
   // }, []);
+
   return (
-    <div className="inset-0 absolute bg-zinc-900/65 flex justify-center items-center w-full md:h-screen px-3">
+    <div className=" flex justify-center items-center w-full md:h-screen px-3 bg-primary">
       <div
-        className={`w-1/2 py-3 px-2.5 bg-white rounded-md flex space-y-3 flex-col justify-center items-center ${
-          openAddUser && "hidden"
-        }`}
+        className={`w-1/2 p-3 bg-white rounded-md flex space-y-3 flex-col justify-center items-center`}
       >
         <div className="w-full pb-2 space-y-2">
           <header className="flex justify-between items-center w-ful">
@@ -28,7 +26,7 @@ function TimeInForm() {
               Already a Member?
             </h2>
             <button
-              onClick={() => setOpenTimeInForm(false)}
+              onClick={() => router.push("/attendance")}
               className="text-lg text-primary"
             >
               <FaXmark />
@@ -56,16 +54,15 @@ function TimeInForm() {
         <div className="w-full pb-2 space-y-2">
           <h2 className="text-secondary text-xl font-bold">New Here?</h2>
           <button
-            onClick={() => setOpenAddUser(true)}
+            onClick={() => router.push("/register")}
             className="w-full py-2.5 text-white bg-primary rounded-md"
           >
             Register
           </button>
         </div>
       </div>
-      {openAddUser && <AddUser />}
     </div>
   );
 }
 
-export default TimeInForm;
+export default Login;

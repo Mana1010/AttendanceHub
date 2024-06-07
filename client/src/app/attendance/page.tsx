@@ -4,10 +4,10 @@ import { FaUsers } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
 import { utilStore } from "@/store/utils.store";
 import { QueryState, useQuery } from "@tanstack/react-query";
-import TimeInForm from "@/components/TimeIn";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 function Attendance() {
-  const { setOpenTimeInForm, openTimeInForm } = utilStore();
+  const router = useRouter();
   const getAllUsers = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
@@ -42,7 +42,7 @@ function Attendance() {
       <div className="flex-grow px-3 space-y-2 flex flex-col overflow-y-auto">
         <div className="flex justify-end w-full">
           <button
-            onClick={() => setOpenTimeInForm(true)}
+            onClick={() => router.push("/login")}
             className="rounded-sm bg-primary flex space-x-2 items-center px-3.5 py-2 text-white"
           >
             <span className="font-bold text-md">
@@ -99,7 +99,6 @@ function Attendance() {
           </table>
         </div>
       </div>
-      {openTimeInForm && <TimeInForm />}
     </div>
   );
 }
