@@ -13,6 +13,7 @@ class User(models.Model):
     reason = models.TextField(blank=False)
     qr_code = models.CharField(max_length=10, blank=False)
     time_in = models.BigIntegerField(blank=True, null=True)
+    time_out = models.BigIntegerField(blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     

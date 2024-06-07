@@ -3,9 +3,26 @@ import React, { useState } from "react";
 import { FaUsers } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
 import { utilStore } from "@/store/utils.store";
-import { QueryState, useQuery } from "@tanstack/react-query";
+import { QueryState, useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { QueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+interface Payload {
+  user_id: number;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
+  age: number;
+  gender: string;
+  role: string;
+  reason: string;
+  qr_code: string;
+  time_in: number;
+  time_out: number;
+  date_created: Date;
+  date_updated: Date;
+}
 function Attendance() {
   const router = useRouter();
   const getAllUsers = useQuery({
@@ -13,6 +30,28 @@ function Attendance() {
     queryFn: async () => {
       const response = await axios.get("http://127.0.0.1:8000/get_users");
       return response.data.message;
+    },
+  });
+  const timeOutMutation = useMutation({
+    mutationFn: async (data: Payload) => {
+      const formData = new FormData();
+      const payload = { timeOut: Date.now(), user_id: data.user_id };
+      for (let [key, value] of Object.entries(payload)) {
+        formData.append(key, value.toString());
+      }
+
+      const response = await axios.post(
+        `http://127.0.0.1:8000/time_out_user/${payload.user_id}`,
+        formData
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      getAllUsers.refetch();
+    },
+    onError: (err) => {
+      toast.error(err.message);
     },
   });
   return (
@@ -90,9 +129,22 @@ function Attendance() {
                     {new Date(user.time_in).toLocaleString()}
                   </td>
                   <td className="text-center text-[0.8rem] px-2 w-[150px]">
-                    ---
+                    {user.time_out}
                   </td>
-                  <td className="text-center text-[0.8rem] px-2">---</td>
+                  <td className="text-center text-[0.8rem] px-2 space-x-2">
+                    <button className="px-2.5 py-2 bg-primary text-white rounded-md">
+                      Full Details
+                    </button>
+                    <button className="px-2.5 py-2 bg-primary text-white rounded-md">
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => timeOutMutation.mutate(user)}
+                      className="px-2.5 py-2 bg-primary text-white rounded-md"
+                    >
+                      Time Out
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

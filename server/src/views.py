@@ -31,3 +31,14 @@ def get_users(request):
         return JsonResponse({'message': users}, status=200)
     except:
         return JsonResponse({'message': 'Something went wrong'}, status=500)
+@csrf_exempt
+def time_out_user(request, user_id):
+    try:
+        time_out = request.POST.get("timeOut")
+        print(time_out)
+        User.objects.filter(pk=user_id).update(time_out = time_out)
+        return JsonResponse({'message': "Successfully Time Out the user"})
+    except:
+        print("Error")
+        
+    
