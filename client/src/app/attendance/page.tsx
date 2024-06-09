@@ -1,14 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import { FaUsers } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
-import { utilStore } from "@/store/utils.store";
-import { QueryState, useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-interface Payload {
+export interface Payload {
   user_id: number;
   first_name: string;
   middle_name: string | null;
@@ -23,9 +21,12 @@ interface Payload {
   date_created: Date;
   date_updated: Date;
 }
+export interface UserData {
+  data: Payload;
+}
 function Attendance() {
   const router = useRouter();
-  const getAllUsers = useQuery({
+  const getAllUsers = useQuery<Payload[], Error>({
     queryKey: ["users"],
     queryFn: async () => {
       const response = await axios.get("http://127.0.0.1:8000/get_users");
@@ -54,6 +55,12 @@ function Attendance() {
       toast.error(err.message);
     },
   });
+  const activeUsers = getAllUsers?.data?.filter(
+    (user: Payload) => !user.time_out
+  );
+  const totalTimeOut = getAllUsers?.data?.filter(
+    (user: Payload) => user.time_out
+  );
   return (
     <div className="w-full h-full flex flex-col relative">
       <header className="grid space-x-2 md:grid-cols-3 grid-cols-2 p-2">
@@ -66,13 +73,18 @@ function Attendance() {
           </h3>
         </div>
         <div className="rounded-md py-2 px-5 border-zinc-300 border-[1px] h-[100px] flex space-x-2 flex-col items-center space-y-1">
-          <h1 className="font-bold text-3xl text-[#374B65]">0</h1>
+          <h1 className="font-bold text-3xl text-[#374B65]">
+            {getAllUsers.isLoading ? "Loading...." : activeUsers?.length}
+          </h1>
           <h3 className="text-[1rem] text-primary font-semibold">
             TOTAL ACTIVE USERS
           </h3>
         </div>
         <div className="rounded-md py-2 px-5 border-zinc-300 border-[1px] h-[100px] flex space-x-2 flex-col items-center space-y-1">
-          <h1 className="font-bold text-3xl text-[#374B65]">0</h1>
+          <h1 className="font-bold text-3xl text-[#374B65]">
+            {" "}
+            {getAllUsers.isLoading ? "Loading...." : totalTimeOut?.length}
+          </h1>
           <h3 className="text-[1rem] text-primary font-semibold">
             TOTAL TIME OUT
           </h3>
@@ -129,15 +141,22 @@ function Attendance() {
                     {new Date(user.time_in).toLocaleString()}
                   </td>
                   <td className="text-center text-[0.8rem] px-2 w-[150px]">
-                    {user.time_out}
+                    {user.time_out
+                      ? new Date(user.time_out).toLocaleString()
+                      : ""}
                   </td>
                   <td className="text-center text-[0.8rem] px-2 space-x-2">
-                    <button className="px-2.5 py-2 bg-primary text-white rounded-md">
+                    <button
+                      onClick={() =>
+                        router.push(`/attendance/full-details/${user.user_id}`)
+                      }
+                      className="px-2.5 py-2 bg-primary text-white rounded-md"
+                    >
                       Full Details
                     </button>
-                    <button className="px-2.5 py-2 bg-primary text-white rounded-md">
+                    {/* <button className="px-2.5 py-2 bg-primary text-white rounded-md">
                       Edit
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => timeOutMutation.mutate(user)}
                       className="px-2.5 py-2 bg-primary text-white rounded-md"

@@ -11,13 +11,6 @@ function Sidebar() {
   const pathname = usePathname();
   return (
     <div className="absolute left-0 top-0 bottom-0 md:relative w-[300px] py-5 border-r-[1px] border-slate-300 z-20 bg-white h-full">
-      <Image
-        src={sidebarBg}
-        alt="sidebar-bg"
-        priority
-        width={300}
-        className="absolute bottom-0 right-0 left-0"
-      />
       <div className="flex item-center space-x-1 px-2">
         <span className="text-primary text-3xl">
           <SiClockify />
@@ -42,7 +35,7 @@ function Sidebar() {
           <button
             onClick={() => router.push("/attendance")}
             className={`p-3 flex space-x-2 items-center rounded-r-3xl  ${
-              pathname === "/attendance" && "text-white bg-primary"
+              pathname.startsWith("/attendance") && "text-white bg-primary"
             } w-full text-[0.9rem]`}
           >
             ATTENDANCE
@@ -54,13 +47,6 @@ function Sidebar() {
             } w-full text-[0.9rem]`}
           >
             RECORDS
-          </button>
-          <button
-            className={`p-3 flex space-x-2 items-center rounded-r-3xl  ${
-              pathname === "/about" && "text-white bg-primary"
-            } w-full text-[0.9rem]`}
-          >
-            ABOUT
           </button>
         </nav>
       </div>
