@@ -1,11 +1,7 @@
 "use client";
-import Image from "next/image";
 import { SiClockify } from "react-icons/si";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
-import { IoHomeOutline } from "react-icons/io5";
 import { useRouter } from "next/navigation";
-import sidebarBg from "../components/images/attendance-bg.png";
 function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
@@ -41,12 +37,28 @@ function Sidebar() {
             ATTENDANCE
           </button>
           <button
+            onClick={() => router.push("/user-list")}
+            className={`p-3 flex space-x-2 items-center rounded-r-3xl  ${
+              pathname === "/session-log" && "text-white bg-primary"
+            } w-full text-[0.9rem]`}
+          >
+            SESSION LOG
+          </button>
+          <button
             onClick={() => router.push("/records")}
             className={`p-3 flex space-x-2 items-center rounded-r-3xl  ${
               pathname === "/records" && "text-white bg-primary"
             } w-full text-[0.9rem]`}
           >
             RECORDS
+          </button>
+          <button
+            onClick={() => router.push("/trash")}
+            className={`p-3 flex space-x-2 items-center rounded-r-3xl  ${
+              pathname === "/trash" && "text-white bg-primary"
+            } w-full text-[0.9rem]`}
+          >
+            TRASH
           </button>
         </nav>
       </div>

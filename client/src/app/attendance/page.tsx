@@ -4,8 +4,10 @@ import { FaPlus } from "react-icons/fa6";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { IoSearchOutline } from "react-icons/io5";
+import NotFound from "@/components/NotFound";
+import EmptyUser from "@/components/EmptyUser";
 export interface Payload {
   user_id: number;
   first_name: string;
@@ -17,7 +19,7 @@ export interface Payload {
   reason: string;
   qr_code: string;
   time_in: number;
-  time_out: number;
+  time_out: number | null;
   date_created: Date;
   date_updated: Date;
 }
@@ -26,10 +28,17 @@ export interface UserData {
 }
 function Attendance() {
   const router = useRouter();
-  const getAllUsers = useQuery<Payload[], Error>({
+  const [activeUsers, setActiveUsers] = useState<Payload[] | null>(null);
+  const [searchName, setSearchName] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("");
+  const getAllUsers = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       const response = await axios.get("http://127.0.0.1:8000/get_users");
+      const filteredArr = response.data.message.filter(
+        (user: Payload) => !user.time_out
+      );
+      setActiveUsers(filteredArr);
       return response.data.message;
     },
   });
@@ -55,23 +64,20 @@ function Attendance() {
       toast.error(err.message);
     },
   });
-  const activeUsers = getAllUsers?.data?.filter(
-    (user: Payload) => !user.time_out
-  );
+  if (getAllUsers.isLoading) {
+    return <h1>LOADINGGGGG</h1>;
+  }
   const totalTimeOut = getAllUsers?.data?.filter(
     (user: Payload) => user.time_out
   );
+  const searchFilterName = activeUsers?.filter((user: Payload) =>
+    new RegExp(searchName, "i").test(
+      `${user.first_name.toLowerCase()} ${user.middle_name?.toLowerCase()} ${user.last_name.toLowerCase()}}`
+    )
+  );
   return (
     <div className="w-full h-full flex flex-col relative">
-      <header className="grid space-x-2 md:grid-cols-3 grid-cols-2 p-2">
-        <div className="rounded-md py-2 px-5 border-zinc-300 border-[1px] h-[100px] flex space-x-2 flex-col items-center space-y-1">
-          <h1 className="font-bold text-3xl text-[#374B65]">
-            {getAllUsers.data && getAllUsers.data?.length}
-          </h1>
-          <h3 className="text-[1rem] text-primary font-semibold">
-            TOTAL USERS
-          </h3>
-        </div>
+      <header className="grid space-x-2 grid-cols-2 p-2">
         <div className="rounded-md py-2 px-5 border-zinc-300 border-[1px] h-[100px] flex space-x-2 flex-col items-center space-y-1">
           <h1 className="font-bold text-3xl text-[#374B65]">
             {getAllUsers.isLoading ? "Loading...." : activeUsers?.length}
@@ -91,6 +97,39 @@ function Attendance() {
         </div>
       </header>
       <div className="flex-grow px-3 space-y-2 flex flex-col overflow-y-auto">
+        <div className="w-full flex justify-between items-center px-2">
+          <div className=" w-1/2 flex rounded-sm border-[1px] border-primary">
+            <label
+              htmlFor="search-user"
+              className="px-3 rounded-sm bg-primary text-white flex items-center justify-center"
+            >
+              <IoSearchOutline />
+            </label>
+            <input
+              id="search-user"
+              type="text"
+              onChange={(e) => setSearchName(e.target.value)}
+              value={searchName}
+              placeholder="Search active user"
+              className="py-2 px-1 outline-none text-primary flex-grow"
+            />
+          </div>
+          <div className="space-x-1 flex items-center">
+            <select
+              onChange={(e) => setSortBy(e.target.value)}
+              value={sortBy}
+              className="border-[1px] border-primary text-secondary px-3 py-1 cursor-pointer outline-none"
+            >
+              <option value="" hidden>
+                Sort By
+              </option>
+              <option value={"A-Z"}>Name A-Z</option>
+              <option value={"Z-A"}>Name Z-A</option>
+              <option value={"ASC"}>Time In (Oldest)</option>
+              <option value={"DESC"}>Time In (Latest)</option>
+            </select>
+          </div>
+        </div>
         <div className="flex justify-end w-full">
           <button
             onClick={() => router.push("/login")}
@@ -103,71 +142,77 @@ function Attendance() {
           </button>
         </div>
         <div>
-          <table className="w-full border-collapse">
-            <thead className="p-2 sticky top-0 bg-white border-zinc-500">
-              <tr>
-                <th>USER ID</th>
-                <th>NAME</th>
-                <th>ROLE</th>
-                <th>REASON</th>
-                <th>TIME IN</th>
-                <th>TIME OUT</th>
-                <th>ACTION</th>
-              </tr>
-            </thead>
-            <tbody>
-              {getAllUsers.data?.map((user: any, index: number) => (
-                <tr
-                  key={user.user_id}
-                  className={`${
-                    index % 2 === 0
-                      ? "bg-violet-500 text-white"
-                      : "bg-white textt-secondary"
-                  }`}
-                >
-                  <td className="text-center py-2 px-2 w-[100px] text-[0.8rem]">
-                    {user.user_id}
-                  </td>
-                  <td className="text-center py-2 px-2 w-[150px] text-[0.8rem]">{`${user.first_name} ${user.middle_name} ${user.last_name}`}</td>
-                  <td className="text-center py-2 px-2 w-[100px] text-[0.8rem]">
-                    {user.role}
-                  </td>
-                  <td className="text-center py-2 px-2 w-[150px] text-[0.8rem]">
-                    {user.reason.length < 15
-                      ? user.reason
-                      : `${user.reason.slice(0, 30)}...`}
-                  </td>
-                  <td className="text-center text-[0.8rem] px-2 w-[150px]">
-                    {new Date(user.time_in).toLocaleString()}
-                  </td>
-                  <td className="text-center text-[0.8rem] px-2 w-[150px]">
-                    {user.time_out
-                      ? new Date(user.time_out).toLocaleString()
-                      : ""}
-                  </td>
-                  <td className="text-center text-[0.8rem] px-2 space-x-2">
-                    <button
-                      onClick={() =>
-                        router.push(`/attendance/full-details/${user.user_id}`)
-                      }
-                      className="px-2.5 py-2 bg-primary text-white rounded-md"
-                    >
-                      Full Details
-                    </button>
-                    {/* <button className="px-2.5 py-2 bg-primary text-white rounded-md">
-                      Edit
-                    </button> */}
-                    <button
-                      onClick={() => timeOutMutation.mutate(user)}
-                      className="px-2.5 py-2 bg-primary text-white rounded-md"
-                    >
-                      Time Out
-                    </button>
-                  </td>
+          {!activeUsers?.length && !searchName.trim() ? (
+            <EmptyUser />
+          ) : !searchFilterName?.length && searchName.trim() ? (
+            <NotFound search={searchName} />
+          ) : (
+            <table className="w-full border-collapse">
+              <thead className="p-2 sticky top-0 bg-white border-zinc-500">
+                <tr>
+                  <th>USER ID</th>
+                  <th>NAME</th>
+                  <th>ROLE</th>
+                  <th>REASON</th>
+                  <th>TIME IN</th>
+                  <th>TIME OUT</th>
+                  <th>ACTION</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {searchFilterName?.map((user: Payload, index: number) => (
+                  <tr
+                    key={user.user_id}
+                    className={`${
+                      index % 2 === 0
+                        ? "bg-violet-500 text-white"
+                        : "bg-white textt-secondary"
+                    }`}
+                  >
+                    <td className="text-center py-2 px-2 w-[100px] text-[0.8rem]">
+                      {user.user_id}
+                    </td>
+                    <td className="text-center py-2 px-2 w-[150px] text-[0.8rem]">{`${user.first_name} ${user.middle_name} ${user.last_name}`}</td>
+                    <td className="text-center py-2 px-2 w-[100px] text-[0.8rem]">
+                      {user.role}
+                    </td>
+                    <td className="text-center py-2 px-2 w-[150px] text-[0.8rem]">
+                      {user.reason.length < 15
+                        ? user.reason
+                        : `${user.reason.slice(0, 30)}...`}
+                    </td>
+                    <td className="text-center text-[0.8rem] px-2 w-[150px]">
+                      {new Date(user.time_in).toLocaleString()}
+                    </td>
+                    <td className="text-center text-[0.8rem] px-2 w-[150px]">
+                      {user.time_out
+                        ? new Date(user.time_out).toLocaleString()
+                        : "----"}
+                    </td>
+                    <td className="text-center text-[0.8rem] px-2 space-x-2">
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/attendance/full-details/${user.user_id}`
+                          )
+                        }
+                        className="px-2.5 py-2 bg-primary text-white rounded-md"
+                      >
+                        Full Details
+                      </button>
+
+                      <button
+                        onClick={() => timeOutMutation.mutate(user)}
+                        className="px-2.5 py-2 bg-primary text-white rounded-md"
+                      >
+                        Time Out
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

@@ -28,11 +28,6 @@ function FullDetails({ params }: Params) {
     console.log(getUserDetails.error);
   }
   const date = new Date(getUserDetails.data.date_created).getTime();
-  // const dateFormatted = new Date(date)
-  //   .toUTCString()
-  //   .split(" ")
-  //   .at(-2)
-  //   ?.split(":")[0];
   const dateFormatted = new Date(date).toDateString();
   return (
     <div className="bg-primary w-full h-full flex justify-center items-center">
@@ -87,7 +82,11 @@ function FullDetails({ params }: Params) {
             <div className="w-full py-2.5 px-2 bg-primary rounded-md outline-[1px] text-sm text-white">
               <span>
                 {" "}
-                <span>{getUserDetails.data.middle_name}</span>
+                <span>
+                  {getUserDetails.data.middle_name
+                    ? getUserDetails.data.middle_name
+                    : "N/A"}
+                </span>
               </span>
             </div>
           </div>

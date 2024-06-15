@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from django.utils import timezone
+
 
 # Create your views here.
 
@@ -28,7 +28,6 @@ def add_user(request):
 def get_users(request):
     try:
         users = list(User.objects.values())
-        print(type(users))
         return JsonResponse({'message': users}, status=200)
     except:
         return JsonResponse({'message': 'Something went wrong'}, status=500)
