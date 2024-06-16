@@ -37,7 +37,7 @@ function FullDetails({ params }: Params) {
             FULL DETAILS OF{" "}
             <span className="text-primary">{`${getUserDetails.data.first_name} ${getUserDetails.data.middle_name} ${getUserDetails.data.last_name}`}</span>
           </h3>
-          <div className="flex items-center space-x-1">
+          {/* <div className="flex items-center space-x-1">
             <span className="text-[0.5rem] text-primary">
               <GoDotFill />
             </span>
@@ -48,7 +48,7 @@ function FullDetails({ params }: Params) {
             >
               {getUserDetails.data.time_out ? "Offline" : "Online"}
             </small>
-          </div>
+          </div> */}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 pt-4 gap-2">
           <div>

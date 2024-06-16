@@ -23,7 +23,11 @@ const userSchema = z.object({
   reason: z.string().min(1, "This field is required"),
 });
 type UserSchema = z.infer<typeof userSchema>;
-const randomCode = randomString({ length: 5, numeric: true });
+function randomCode() {
+  const random = randomString({ length: 5, numeric: true });
+  return random;
+}
+
 function Register() {
   const [displayCode, setDisplayCode] = useState(false);
   const { setCode, setName } = utilStore();
@@ -49,7 +53,7 @@ function Register() {
   const timeInMutation = useMutation({
     mutationFn: async (data: UserSchema) => {
       const formData = new FormData();
-      const payload = { ...data, code: randomCode, timeIn: Date.now() };
+      const payload = { ...data, code: randomCode(), timeIn: Date.now() };
       for (let [key, value] of Object.entries(payload)) {
         formData.append(key, value.toString());
       }

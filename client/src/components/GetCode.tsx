@@ -42,8 +42,8 @@ function GetCode() {
       <div className="w-full flex items-center justify-center mt-2">
         <button
           onClick={() => {
-            router.push("/attendance");
             setCode(null), setName(null);
+            router.push("/attendance");
           }}
           className="w-full md:w-1/2 bg-primary py-2.5 px-2 text-white rounded-md mx-auto"
         >

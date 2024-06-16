@@ -18,7 +18,7 @@ def add_user(request):
         time_in = request.POST.get("timeIn")
         reason = request.POST.get("reason")
         qr_code = request.POST.get("code")
-        user = User.objects.create(first_name=first_name, last_name=last_name, middle_name = middle_name, age = age, gender = gender, role = role, reason = reason, time_in =  time_in, qr_code = qr_code)
+        user = User.objects.create(first_name=first_name, last_name=last_name, middle_name = middle_name, age = age, gender = gender, role = role, reason = reason, time_in =  time_in, qr_code = qr_code, is_trash = False)
         return JsonResponse({"message": "Successfully added a user", "code": user.qr_code, "first_name": user.first_name}, status=201)
     except Exception as e:
         print(e)
@@ -31,6 +31,12 @@ def get_users(request):
         return JsonResponse({'message': users}, status=200)
     except:
         return JsonResponse({'message': 'Something went wrong'}, status=500)
+def get_session_logs(request):
+    try:
+        users = list(User.objects.select_related("sessionlogs").values())
+        return JsonResponse({'message': users}, status=200)
+    except:
+        return JsonResponse({'message': "Error"}, status=500)
 @csrf_exempt
 def time_out_user(request, user_id):
     try:
