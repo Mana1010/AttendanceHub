@@ -2,12 +2,14 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import axios from "axios";
 interface Params {
   params: {
     sessionId: string;
   };
 }
+
 function FullDetails({ params }: Params) {
   const router = useRouter();
   const getUserDetails = useQuery({
@@ -16,7 +18,6 @@ function FullDetails({ params }: Params) {
       const response = await axios.get(
         `http://127.0.0.1:8000/get_session_log_details/${params.sessionId}`
       );
-      console.log(response.data.message);
       return response.data.message;
     },
   });
@@ -26,7 +27,6 @@ function FullDetails({ params }: Params) {
   if (getUserDetails.isLoading) {
     return <h1>Loading..</h1>;
   }
-  console.log(getUserDetails.data.user[0].first_name);
   return (
     <div className="bg-primary w-full h-full flex justify-center items-center">
       <div className="flex flex-col bg-white rounded-md w-full md:w-[75%] py-3 px-2">
@@ -152,6 +152,56 @@ function FullDetails({ params }: Params) {
                 <span>
                   {" "}
                   <span>{getUserDetails.data?.session_log[0].total_visit}</span>
+                </span>
+              </div>
+            </div>
+            <div>
+              <h6 className="font-semibold text-primary text-[0.8rem]">
+                Total Time Consumed
+                <small className="font-semibold italic text-[0.6rem]">
+                  (minute)
+                </small>
+              </h6>
+              <div className="w-full py-2.5 px-2 bg-primary rounded-md outline-[1px] text-sm text-white">
+                <span>
+                  {" "}
+                  <span>
+                    {getUserDetails.data?.user[0].time_out
+                      ? getUserDetails.data.session_log[0].total_time_consumed
+                      : "-----"}
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div>
+              <h6 className="font-semibold text-primary text-[0.8rem]">
+                Time In
+              </h6>
+              <div className="w-full py-2.5 px-2 bg-primary rounded-md outline-[1px] text-sm text-white">
+                <span>
+                  {" "}
+                  <span>
+                    {new Date(
+                      getUserDetails.data.user[0].time_in
+                    ).toLocaleString()}
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div>
+              <h6 className="font-semibold text-primary text-[0.8rem]">
+                Time Out
+              </h6>
+              <div className="w-full py-2.5 px-2 bg-primary rounded-md outline-[1px] text-sm text-white">
+                <span>
+                  {" "}
+                  <span>
+                    {getUserDetails.data?.user[0].time_out
+                      ? new Date(
+                          getUserDetails.data.user[0].time_out
+                        ).toLocaleString()
+                      : "-----"}
+                  </span>
                 </span>
               </div>
             </div>

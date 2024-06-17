@@ -26,6 +26,7 @@ function FullDetails({ params }: Params) {
   if (getUserDetails.isError) {
     console.log(getUserDetails.error);
   }
+  console.log(getUserDetails);
   const date = new Date(getUserDetails.data.date_created).getTime();
   const dateFormatted = new Date(date).toDateString();
   return (

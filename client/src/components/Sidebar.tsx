@@ -61,7 +61,7 @@ function Sidebar() {
         <button
           onClick={() => router.push("/login")}
           className={`p-3 flex space-x-2 items-center rounded-r-3xl  ${
-            pathname === "/login" && "text-white bg-primary"
+            pathname.startsWith("/login") && "text-white bg-primary"
           } w-full text-[0.9rem]`}
         >
           LOGIN

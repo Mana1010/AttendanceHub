@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Inter, Poppins, Open_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import Sidebar from "@/components/Sidebar";
 import Provider from "./Provider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
-const poppins = Poppins({ subsets: ["latin"], weight: ["500"] });
+const poppins = Poppins({ subsets: ["latin"], weight: ["400"] });
+const open_sans = Open_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Attendance System",

@@ -70,17 +70,11 @@ function SessionLog() {
         a.first_name.localeCompare(b.first_name)
       );
       setSessionData(sortUserAZ);
-    } else if (value === "z-a") {
+    } else {
       const sortUserZA = sessionData?.sort((b, a) =>
         a.first_name.localeCompare(b.first_name)
       );
       setSessionData(sortUserZA);
-    } else if (value === "new") {
-      const sortUserLatest = sessionData?.sort((a, b) => a.time_in - b.time_in);
-      setSessionData(sortUserLatest);
-    } else {
-      const sortUserOldest = sessionData?.sort((b, a) => a.time_in - b.time_in);
-      setSessionData(sortUserOldest);
     }
   }
   return (
@@ -138,14 +132,15 @@ function SessionLog() {
             />
           </div>
           <div className="space-x-1 flex items-center">
-            <select className="border-[1px] border-primary text-secondary px-3 py-1 cursor-pointer outline-none">
+            <select
+              onChange={handleSortBy}
+              className="border-[1px] border-primary text-secondary px-3 py-1 cursor-pointer outline-none"
+            >
               <option value="" hidden>
                 Sort By
               </option>
               <option value={"a-z"}>Name A-Z</option>
               <option value={"z-a"}>Name Z-A</option>
-              <option value={"new"}>Time In (Latest)</option>
-              <option value={"old"}>Time In (Oldest)</option>
             </select>
           </div>
         </div>

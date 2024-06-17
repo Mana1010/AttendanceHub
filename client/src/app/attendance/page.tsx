@@ -49,10 +49,8 @@ function Attendance() {
 
   const timeOutMutation = useMutation({
     mutationFn: async (data: Payload) => {
-      const timeConsumed = differenceInMinutes(
-        data.time_in,
-        new Date().getTime()
-      );
+      const date = new Date(data.date_created).getTime();
+      const timeConsumed = differenceInMinutes(new Date().getTime(), date);
       const formData = new FormData();
       const payload = {
         timeOut: Date.now(),

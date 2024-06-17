@@ -3,6 +3,7 @@ from .models import User, SessionLog, Trash
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
+from django.core import serializers
 
 
 # Create your views here.
@@ -59,11 +60,29 @@ def time_out_user(request, user_id):
         time_consumed = request.POST.get("timeConsumed")
         time_out = request.POST.get("timeOut")
         User.objects.filter(pk=user_id).update(time_out = time_out)
-        # SessionLog.objects.create()
+        SessionLog.objects.filter(user_id=user_id).update(total_time_consumed = time_consumed)
         return JsonResponse({'message': "Successfully Time Out the user"})
     except:
         print("Error")
-
+@csrf_exempt
+def enter_code(request):
+    code = request.POST.get("code")
+    try:
+        check_code = User.objects.filter(qr_code = code).exists()
+        user= list(User.objects.filter(qr_code = code).values("user_id", "time_out"))
+        if check_code:
+            if user[0]["time_out"]:
+                 return JsonResponse({'message': "Successfully logged in", 'success': True, 'user_id': user[0]["user_id"]})
+            else:
+                return JsonResponse({'message': "The user is online", 'success': False})
+           
+        else:
+            raise ValueError(f"{code} code doesn't exist!")
+      
+    except ValueError as e:
+        return JsonResponse({'message': str(e), 'success': False})
+    except Exception as e:
+        return JsonResponse({'message': 'Error'})
 @csrf_exempt
 def get_user_details(request, user_id):
     try:
@@ -87,4 +106,21 @@ def get_user_details(request, user_id):
     except:
         return JsonResponse({'message': 'Error'})
         
+@csrf_exempt
+def get_name_and_reason_user(request, user_id):
+    user = list(User.objects.filter(pk=user_id).values("first_name", "reason"))
+    return JsonResponse({'message': {
+        'name': user[0]["first_name"],
+        "reason": user[0]["reason"]
+    }})
+
+@csrf_exempt
+def edit_reason(request, user_id):
+    reason = request.POST.get("reason")
+    time_in = request.POST.get("timeIn")
+    User.objects.filter(pk=user_id).update(reason=reason, time_out = None, time_in = time_in)
+    session = SessionLog.objects.get(user_id=user_id)
+    session.total_visit += session.total_visit
+    session.save()
+    return JsonResponse({'message': "Successfully time in"}, status=201)
     
