@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { IoSearchOutline } from "react-icons/io5";
 import NotFound from "@/components/NotFound";
 import EmptyUser from "@/components/EmptyUser";
+import { differenceInMinutes } from "date-fns";
 export interface Payload {
   user_id: number;
   first_name: string;
@@ -45,10 +46,19 @@ function Attendance() {
       return response.data.message;
     },
   });
+
   const timeOutMutation = useMutation({
     mutationFn: async (data: Payload) => {
+      const timeConsumed = differenceInMinutes(
+        data.time_in,
+        new Date().getTime()
+      );
       const formData = new FormData();
-      const payload = { timeOut: Date.now(), user_id: data.user_id };
+      const payload = {
+        timeOut: Date.now(),
+        user_id: data.user_id,
+        timeConsumed,
+      };
       for (let [key, value] of Object.entries(payload)) {
         formData.append(key, value.toString());
       }
@@ -91,12 +101,12 @@ function Attendance() {
         a.first_name.localeCompare(b.first_name)
       );
       setActiveUsers(sortUserZA);
-    } else if (value === "new") {
-      const sortUserLatest = activeUsers?.sort((a, b) => a.time_in - b.time_in);
-      setActiveUsers(sortUserLatest);
-    } else {
-      const sortUserOldest = activeUsers?.sort((b, a) => a.time_in - b.time_in);
+    } else if (value === "old") {
+      const sortUserOldest = activeUsers?.sort((a, b) => a.time_in - b.time_in);
       setActiveUsers(sortUserOldest);
+    } else {
+      const sortUserLatest = activeUsers?.sort((b, a) => a.time_in - b.time_in);
+      setActiveUsers(sortUserLatest);
     }
   }
   if (getAllUsers.isLoading) {
@@ -216,7 +226,7 @@ function Attendance() {
                         ? new Date(user.time_out).toLocaleString()
                         : "----"}
                     </td>
-                    <td className="text-center text-[0.8rem] px-2 space-x-2">
+                    <td className="text-center text-[0.8rem] space-x-2 p-2">
                       <button
                         onClick={() =>
                           router.push(

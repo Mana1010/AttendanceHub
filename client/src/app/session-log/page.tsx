@@ -5,7 +5,6 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Payload } from "../attendance/page";
 import { useRouter } from "next/navigation";
 import { IoSearchOutline } from "react-icons/io5";
-import { FaPlus } from "react-icons/fa6";
 import EmptyUser from "@/components/EmptyUser";
 import NotFound from "@/components/NotFound";
 
@@ -22,7 +21,7 @@ function SessionLog() {
   const [status, setStatus] = useState<string>("All");
   const [sortBy, setSortBy] = useState<string | null>(null);
   const getAllUsers = useQuery({
-    queryKey: ["users"],
+    queryKey: ["session-user"],
     queryFn: async () => {
       const response = await axios.get(
         "http://127.0.0.1:8000/get_session_logs"
@@ -31,7 +30,6 @@ function SessionLog() {
       return response.data.message;
     },
   });
-  console.log(sessionData);
   if (getAllUsers.isLoading) {
     return <h1>Loading.....</h1>;
   }
@@ -231,11 +229,11 @@ function SessionLog() {
                         ? new Date(user.time_out).toLocaleString()
                         : "----"}
                     </td>
-                    <td className="text-center text-[0.8rem] px-2 space-x-2">
+                    <td className="text-center text-[0.8rem] space-x-2 p-2">
                       <button
                         onClick={() =>
                           router.push(
-                            `/attendance/full-details/${user.user_id}`
+                            `/session-log/full-details/${user.user_id}`
                           )
                         }
                         className="px-2.5 py-2 bg-primary text-white rounded-md"
