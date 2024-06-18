@@ -28,7 +28,7 @@ class SessionLog(models.Model):
     total_visit = models.IntegerField(blank=False, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sessionlogs")
     
     class Meta:
         db_table = "sessionlogs"
@@ -37,7 +37,7 @@ class Trash(models.Model):
     trash_id = models.BigAutoField(primary_key=True, blank=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trashes")
     
     
     class Meta:

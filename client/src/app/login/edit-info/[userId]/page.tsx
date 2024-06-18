@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DevTool } from "@hookform/devtools";
+import { toast } from "sonner";
 interface Params {
   params: {
     userId: string;
@@ -37,7 +38,24 @@ function EditInfo({ params }: Params) {
   });
   const editUserMutation = useMutation({
     mutationFn: async (data: UserSchema) => {
-      const response = await axios.post("");
+      const payload = new FormData();
+      const updatedPayload = { ...data, timeIn: Date.now() };
+      for (const [key, value] of Object.entries(updatedPayload)) {
+        payload.append(key, value.toString());
+      }
+      const response = await axios.post(
+        `http://127.0.0.1:8000/edit_user/${params.userId}`,
+        payload
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success(data.message);
+        router.push("/attendance");
+      } else {
+        toast.error(data.message);
+      }
     },
   });
   const {
@@ -57,8 +75,6 @@ function EditInfo({ params }: Params) {
   if (getUserDetails.isLoading) {
     return <h1>...Loading</h1>;
   }
-  const date = new Date(getUserDetails.data.date_created).getTime();
-  const dateFormatted = new Date(date).toDateString();
   function editUser(data: UserSchema) {
     editUserMutation.mutate(data);
   }

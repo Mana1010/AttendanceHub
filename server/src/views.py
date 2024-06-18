@@ -3,6 +3,7 @@ from .models import User, SessionLog, Trash
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms.models import model_to_dict
 
 
 # Create your views here.
@@ -29,7 +30,7 @@ def add_user(request):
 @csrf_exempt
 def get_users(request):
     try:
-        users = list(User.objects.values())
+        users = list(User.objects.all().values())
         return JsonResponse({'message': users}, status=200)
     except:
         return JsonResponse({'message': 'Something went wrong'}, status=500)
@@ -37,7 +38,7 @@ def get_users(request):
 @csrf_exempt
 def get_session_logs(request):
     try:
-        users = list(User.objects.select_related("sessionlogs").values())
+        users = list(User.objects.all().values())
         return JsonResponse({'message': users}, status=200)
     except:
         return JsonResponse({'message': "Error"}, status=500)
@@ -45,8 +46,8 @@ def get_session_logs(request):
 @csrf_exempt
 def get_session_log_details(request, user_id):
     try:
-        session_log = list(SessionLog.objects.select_related("users").filter(user_id=user_id).values())
-        user = list(User.objects.select_related("sessionlogs").filter(pk=user_id).values())
+        session_log = list(SessionLog.objects.select_related('user').filter(user_id=user_id).values())
+        user = list(User.objects.filter(pk=user_id).values())
         return JsonResponse({'message': {"user": user, "session_log": session_log}}, status=200)
     except ObjectDoesNotExist:
         return JsonResponse({'message': "User doesn't exist"})
@@ -104,7 +105,7 @@ def edit_reason(request, user_id):
     time_in = request.POST.get("timeIn")
     User.objects.filter(pk=user_id).update(reason=reason, time_out = None, time_in = time_in)
     session = SessionLog.objects.get(user_id=user_id)
-    session.total_visit += session.total_visit
+    session.total_visit += 1
     session.save()
     return JsonResponse({'message': "Successfully time in"}, status=201)
 
@@ -112,13 +113,31 @@ def edit_reason(request, user_id):
 def get_user_details_edit_info(request, user_id):
     try:
         user = list(User.objects.filter(pk=user_id).values("first_name", "middle_name", "last_name", "age", "gender", "role", "reason"))
-        return JsonResponse({'message': user, 'success': True})
+        return JsonResponse({'message': user, 'success': True}, status=200)
     except ObjectDoesNotExist:
         return JsonResponse({'message': "This user does not exist", 'success': False})
         
          
    
     
-# @csrf_exempt
-# def edit_user(request, user_id):
+@csrf_exempt
+def edit_user(request, user_id):
+    first_name = request.POST.get("first_name")
+    middle_name = request.POST.get("middle_name")
+    last_name = request.POST.get("last_name")
+    age = request.POST.get("age")
+    gender = request.POST.get("gender")
+    role = request.POST.get("role")
+    reason = request.POST.get("reason")
+    time_in = request.POST.get("timeIn")
+    try:
+        User.objects.filter(pk=user_id).update(first_name = first_name, middle_name = middle_name, last_name = last_name, age = age, gender = gender, role = role, reason = reason, time_out = None, time_in = time_in)
+        session = SessionLog.objects.get(user_id = user_id)
+        session.total_visit += 1
+        session.save()
+        return JsonResponse({'message': "Successfully update the profile", "success": True}, status=201)
+    except ObjectDoesNotExist as e:
+        return JsonResponse({'message': "User not found", "success": False}, status=404)
+    except:
+        return JsonResponse({'message': "Error", "success": False}, status=400)
     
