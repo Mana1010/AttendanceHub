@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DevTool } from "@hookform/devtools";
 interface Params {
   params: {
     userId: string;
@@ -25,23 +26,27 @@ const userSchema = z.object({
 type UserSchema = z.infer<typeof userSchema>;
 function EditInfo({ params }: Params) {
   const router = useRouter();
-  const [userData, setUserData] = useState();
   const getUserDetails = useQuery({
     queryKey: ["user", params.userId],
     queryFn: async () => {
       const response = await axios.get(
-        `http://127.0.0.1:8000/get_user_details/${params.userId}`
+        `http://127.0.0.1:8000/get_user_details_edit_info/${params.userId}`
       );
-      setUserData(response.data.message);
-      return response.data.message;
+      return response.data.message[0];
+    },
+  });
+  const editUserMutation = useMutation({
+    mutationFn: async (data: UserSchema) => {
+      const response = await axios.post("");
     },
   });
   const {
     handleSubmit,
     reset,
+    control,
     register,
     formState: { errors },
-  } = useForm({
+  } = useForm<UserSchema>({
     resolver: zodResolver(userSchema),
   });
   useEffect(() => {
@@ -54,11 +59,13 @@ function EditInfo({ params }: Params) {
   }
   const date = new Date(getUserDetails.data.date_created).getTime();
   const dateFormatted = new Date(date).toDateString();
-
+  function editUser(data: UserSchema) {
+    editUserMutation.mutate(data);
+  }
   return (
     <div className="bg-primary w-full h-full flex justify-center items-center">
       <form
-        // onSubmit={handleSubmit(editUser)}
+        onSubmit={handleSubmit(editUser)}
         className={`w-full md:max-w-[800px] bg-white rounded-sm p-3 space-y-2 flex flex-col`}
       >
         <h1 className="text-primary font-semibold text-xl">
@@ -76,19 +83,19 @@ function EditInfo({ params }: Params) {
               {...register("first_name")}
               type="text"
               id="firstname"
-              name="firstname"
+              name="first_name"
               placeholder="@e.g Tristan Vic"
               className="w-full py-2.5 px-2 bg-slate-200 rounded-md outline-[1px] outline-primary placeholder:text-slate-500 text-sm"
             />
-            {/* {errors.firstname?.message && (
+            {errors.first_name?.message && (
               <p className="text-red-500 text-[0.8rem]">
-                {errors.firstname.message}
+                {errors.first_name.message}
               </p>
-            )} */}
+            )}
           </div>
           <div>
             <label
-              htmlFor="first_name"
+              htmlFor="middlename"
               className="font-semibold text-primary text-[0.8rem]"
             >
               Middle Name{" "}
@@ -99,6 +106,7 @@ function EditInfo({ params }: Params) {
             <input
               {...register("middle_name")}
               type="text"
+              id="middlename"
               name="middle_name"
               placeholder="@e.j Tacurda"
               className="w-full py-2.5 px-2 bg-slate-200 rounded-md outline-[1px] outline-primary placeholder:text-slate-500 text-sm"
@@ -106,7 +114,7 @@ function EditInfo({ params }: Params) {
           </div>
           <div>
             <label
-              htmlFor="firstname"
+              htmlFor="lastname"
               className="font-semibold text-primary text-[0.8rem]"
             >
               Last Name
@@ -114,19 +122,20 @@ function EditInfo({ params }: Params) {
             <input
               {...register("last_name")}
               type="text"
+              id="lastname"
               name="last_name"
               placeholder="@e.g Clarito"
               className="w-full py-2.5 px-2 bg-slate-200 rounded-md outline-[1px] outline-primary placeholder:text-slate-500 text-sm"
             />
-            {/* {errors.lastname?.message && (
+            {errors.last_name?.message && (
               <p className="text-red-500 text-[0.8rem]">
-                {errors.lastname.message}
+                {errors.last_name.message}
               </p>
-            )} */}
+            )}
           </div>
           <div>
             <label
-              htmlFor="firstname"
+              htmlFor="age"
               className="font-semibold text-primary text-[0.8rem]"
             >
               Age
@@ -134,14 +143,15 @@ function EditInfo({ params }: Params) {
             <input
               {...register("age", { valueAsNumber: true })}
               type="number"
+              id="age"
               name="age"
               max={130}
               min={1}
               className="w-full py-2.5 px-2 bg-slate-200 rounded-md outline-[1px] outline-primary placeholder:text-slate-500 text-sm"
             />
-            {/* {errors.age?.message && (
+            {errors.age?.message && (
               <p className="text-red-500 text-[0.8rem]">{errors.age.message}</p>
-            )} */}
+            )}
           </div>
           <div>
             <label
@@ -166,11 +176,11 @@ function EditInfo({ params }: Params) {
                 LGBTQ+
               </option>
             </select>
-            {/* {errors.gender?.message && (
+            {errors.gender?.message && (
               <p className="text-red-500 text-[0.8rem]">
                 {errors.gender.message}
               </p>
-            )} */}
+            )}
           </div>
           <div>
             <label
@@ -210,16 +220,16 @@ function EditInfo({ params }: Params) {
               placeholder="Your Reason"
               className="w-full py-2.5 px-2 bg-slate-200 rounded-md outline-[1px] outline-primary placeholder:text-slate-500 h-[70px] resize-none text-sm"
             ></textarea>
-            {/* {errors.reason?.message && (
+            {errors.reason?.message && (
               <p className="text-red-500 text-[0.8rem]">
                 {errors.reason.message}
               </p>
-            )} */}
+            )}
           </div>
         </div>
         <div className="w-full flex items-center justify-between">
           <button
-            onClick={() => router.push("/login")}
+            onClick={() => router.push(`/login/edit/${params.userId}`)}
             type="button"
             className="flex space-x-1 items-center py-2.5 px-3 bg-primary border-[1px] border-primary bg-transparent text-secondary justify-center"
           >
@@ -239,6 +249,7 @@ function EditInfo({ params }: Params) {
           </button>
         </div>
       </form>
+      <DevTool control={control} />
     </div>
   );
 }

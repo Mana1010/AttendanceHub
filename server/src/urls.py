@@ -11,4 +11,5 @@ urlpatterns = [
     path('get_session_log_details/<int:user_id>', views.get_session_log_details, name="get_session_log_details"),
     path('get_name_and_reason_user/<int:user_id>', views.get_name_and_reason_user, name="get_name_and_reason_user"),
     path('edit_reason/<int:user_id>', views.edit_reason, name="edit_reason"),
+    path('get_user_details_edit_info/<int:user_id>', views.get_user_details_edit_info, name="get_user_details_edit_info")
 ]

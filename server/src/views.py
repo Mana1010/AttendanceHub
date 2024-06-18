@@ -3,7 +3,6 @@ from .models import User, SessionLog, Trash
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
-from django.core import serializers
 
 
 # Create your views here.
@@ -86,22 +85,7 @@ def enter_code(request):
 @csrf_exempt
 def get_user_details(request, user_id):
     try:
-        user = User.objects.get(pk=user_id)
-        user_data = {
-            'user_id': user.user_id,
-            'first_name': user.first_name,
-            'middle_name': user.middle_name,
-            'last_name': user.last_name,
-            'age': user.age,
-            'gender': user.gender,
-            'role': user.role,
-            'reason': user.reason,
-            'qr_code': user.qr_code,
-            'time_in': user.time_in,
-            'time_out': user.time_out,
-            'date_created': user.date_created,
-            'date_updated': user.date_updated,
-        }
+        user_data = list(User.objects.filter(pk=user_id).values())
         return JsonResponse({'message': user_data}, status=200)
     except:
         return JsonResponse({'message': 'Error'})
@@ -123,4 +107,18 @@ def edit_reason(request, user_id):
     session.total_visit += session.total_visit
     session.save()
     return JsonResponse({'message': "Successfully time in"}, status=201)
+
+@csrf_exempt
+def get_user_details_edit_info(request, user_id):
+    try:
+        user = list(User.objects.filter(pk=user_id).values("first_name", "middle_name", "last_name", "age", "gender", "role", "reason"))
+        return JsonResponse({'message': user, 'success': True})
+    except ObjectDoesNotExist:
+        return JsonResponse({'message': "This user does not exist", 'success': False})
+        
+         
+   
+    
+# @csrf_exempt
+# def edit_user(request, user_id):
     
