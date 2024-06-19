@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 import { z } from "zod";
-
 const codeSchema = z.object({
   code: z.string().min(1, "This field is required").max(5, "5 characters only"),
 });

@@ -82,7 +82,7 @@ def enter_code(request):
     except ValueError as e:
         return JsonResponse({'message': str(e), 'success': False})
     except Exception as e:
-        return JsonResponse({'message': 'Error'})
+        return JsonResponse({'message': 'Error', 'success': False})
 @csrf_exempt
 def get_user_details(request, user_id):
     try:
@@ -136,8 +136,61 @@ def edit_user(request, user_id):
         session.total_visit += 1
         session.save()
         return JsonResponse({'message': "Successfully update the profile", "success": True}, status=201)
-    except ObjectDoesNotExist as e:
+    except ObjectDoesNotExist:
         return JsonResponse({'message': "User not found", "success": False}, status=404)
     except:
         return JsonResponse({'message': "Error", "success": False}, status=400)
+
+@csrf_exempt
+def trash_user(request, user_id):
+    try:
+        user = User.objects.get(pk=user_id)
+        check_user_status = list(User.objects.filter(pk=user_id).values("time_out"))
+        if check_user_status[0]["time_out"]:
+            user.is_trash = True
+            user.save()
+            Trash.objects.create(user = user)
+            return JsonResponse({'message': 'The user successfully deleted', 'success': True}, status=201)
+        else:
+            return JsonResponse({'message': 'The user is online', 'success': False})
+    except ObjectDoesNotExist as e:
+        return JsonResponse({'message': str(e), 'success': False}, status=404)
+    # except ValueError as e:
+    #     return JsonResponse({'message': str(e), 'success': False}, status=400)
+
+@csrf_exempt
+def get_all_trash(request):
+    try:
+       users = list(User.objects.filter(is_trash = True).values("user_id", "first_name", "middle_name", "last_name", "role", "reason"))
+       return JsonResponse({'message': users, 'success': True}, status=200)
+    except:
+        return JsonResponse({'message': 'Error wtf'})
+@csrf_exempt
+def restore_user(request, user_id):
+    try:
+        User.objects.filter(pk=user_id).update(is_trash = False)
+        return JsonResponse({'message': "Successfully restore the user"}, status=200)
+    except ObjectDoesNotExist as e:
+        return JsonResponse({'message': str(e)}, status=404)
+@csrf_exempt
+def delete_user_permanently(request, user_id):
+    try:
+        User.objects.filter(pk=user_id).delete()
+        SessionLog.objects.filter(user_id = user_id).delete()
+        return JsonResponse({'message': "Successfully deleted the user permanently"}, status=200)
+    except ObjectDoesNotExist as e:
+        return JsonResponse({'mesage': str(e)}, status=404)
+
+@csrf_exempt
+def delete_all_user_permanently(request):
+    confirmation = request.POST.get("confirmation")
+    print(confirmation)
+    try:
+        if confirmation == "attendance_hub_confirm_deletion":
+             User.objects.filter(is_trash = True).delete()
+             return JsonResponse({'message': "Successfullty delete all the trash permanently", 'success': True}, status=201)
+        else:
+            return JsonResponse({'message': "Wrong confirmation text", 'success': False})
+    except:
+        return JsonResponse({'message': "Error"}, status=500)
     

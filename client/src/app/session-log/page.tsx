@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import { IoSearchOutline } from "react-icons/io5";
 import EmptyUser from "@/components/EmptyUser";
 import NotFound from "@/components/NotFound";
-
+import { toast } from "sonner";
+import Loading from "@/components/Loading";
 interface SessionData extends Payload {
   time_visit: number;
   total_time_consumed: number;
@@ -20,18 +21,46 @@ function SessionLog() {
   const [searchName, setSearchName] = useState<string>("");
   const [status, setStatus] = useState<string>("All");
   const [sortBy, setSortBy] = useState<string | null>(null);
+  const [trashes, setTrashes] = useState<number>(0);
   const getAllUsers = useQuery({
     queryKey: ["session-user"],
     queryFn: async () => {
       const response = await axios.get(
         "http://127.0.0.1:8000/get_session_logs"
       );
-      setSessionData(response.data.message);
-      return response.data.message;
+      const data = response.data.message;
+      const getTrash = data.filter((trash: SessionData) => trash.is_trash);
+      const filteredOutTrash = data.filter(
+        (user: SessionData) => !user.is_trash
+      );
+      setTrashes(getTrash.length);
+      setSessionData(filteredOutTrash);
+      return data;
+    },
+  });
+  const deleteUser = useMutation({
+    mutationFn: async (user_id: number) => {
+      const response = await axios.post(
+        `http://127.0.0.1:8000/trash_user/${user_id}`,
+        null
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        getAllUsers.refetch();
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+      console.log(data.success);
+    },
+    onError: (err) => {
+      toast.error(err.message);
     },
   });
   if (getAllUsers.isLoading) {
-    return <h1>Loading.....</h1>;
+    return <Loading />;
   }
   const searchFilterName = sessionData?.filter((user) =>
     new RegExp(searchName, "i").test(
@@ -41,24 +70,30 @@ function SessionLog() {
     )
   );
   const getTimeOfflineUser = getAllUsers.data?.filter(
-    (data: SessionData) => data.time_out
+    (data: SessionData) => data.time_out && !data.is_trash
   );
   const getTimeOnlineUser = getAllUsers.data?.filter(
-    (data: SessionData) => !data.time_out
+    (data: SessionData) => !data.time_out && !data.is_trash
+  );
+  const getNonTrashUser = getAllUsers.data.filter(
+    (user: SessionData) => !user.is_trash
   );
   function checkStatus(status: string) {
     if (status === "Online") {
-      const filteredOnline = getAllUsers.data.filter(
-        (user: SessionData) => !user.time_out
+      const filteredOnline = getAllUsers.data?.filter(
+        (user: SessionData) => !user.time_out && !user.is_trash
       );
       setSessionData(filteredOnline);
     } else if (status === "Offline") {
-      const filteredOffline = getAllUsers.data.filter(
-        (user: SessionData) => user.time_out
+      const filteredOffline = getAllUsers.data?.filter(
+        (user: SessionData) => user.time_out && !user.is_trash
       );
       setSessionData(filteredOffline);
     } else {
-      setSessionData(getAllUsers.data);
+      const filteredOutTrash = getAllUsers.data.filter(
+        (user: SessionData) => !user.is_trash
+      );
+      setSessionData(filteredOutTrash);
     }
     setStatus(status);
   }
@@ -100,14 +135,14 @@ function SessionLog() {
         <div className="rounded-md py-2 px-5 border-zinc-300 border-[1px] h-[100px] flex space-x-2 flex-col items-center space-y-1">
           <h1 className="font-bold text-3xl text-[#374B65]">
             {" "}
-            {getAllUsers.isLoading ? "Loading...." : getAllUsers.data?.length}
+            {getAllUsers.isLoading ? "Loading...." : getNonTrashUser?.length}
           </h1>
           <h3 className="text-[1rem] text-primary font-semibold">
             TOTAL USERS
           </h3>
         </div>
         <div className="rounded-md py-2 px-5 border-zinc-300 border-[1px] h-[100px] flex space-x-2 flex-col items-center space-y-1">
-          <h1 className="font-bold text-3xl text-[#374B65]"> 0</h1>
+          <h1 className="font-bold text-3xl text-[#374B65]">{trashes}</h1>
           <h3 className="text-[1rem] text-primary font-semibold">
             TOTAL TRASH
           </h3>
@@ -236,7 +271,10 @@ function SessionLog() {
                         Full Details
                       </button>
 
-                      <button className="px-2.5 py-2 bg-primary text-white rounded-md">
+                      <button
+                        onClick={() => deleteUser.mutate(user.user_id)}
+                        className="px-2.5 py-2 bg-primary text-white rounded-md"
+                      >
                         Delete
                       </button>
                     </td>

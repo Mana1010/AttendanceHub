@@ -9,6 +9,7 @@ import { IoSearchOutline } from "react-icons/io5";
 import NotFound from "@/components/NotFound";
 import EmptyUser from "@/components/EmptyUser";
 import { differenceInMinutes } from "date-fns";
+import Loading from "@/components/Loading";
 export interface Payload {
   user_id: number;
   first_name: string;
@@ -76,7 +77,7 @@ function Attendance() {
     },
   });
   const totalTimeOut = getAllUsers?.data?.filter(
-    (user: Payload) => user.time_out
+    (user: Payload) => user.time_out && !user.is_trash
   );
 
   const searchFilterName = activeUsers?.filter((user: Payload) =>
@@ -108,7 +109,7 @@ function Attendance() {
     }
   }
   if (getAllUsers.isLoading) {
-    return <h1>LOADINGGGGG</h1>;
+    return <Loading />;
   }
   return (
     <div className="w-full h-full flex flex-col relative">
