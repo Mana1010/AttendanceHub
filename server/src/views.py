@@ -69,13 +69,12 @@ def enter_code(request):
     code = request.POST.get("code")
     try:
         check_code = User.objects.filter(qr_code = code).exists()
-        user= list(User.objects.filter(qr_code = code).values("user_id", "time_out"))
-        if check_code:
+        user= list(User.objects.filter(qr_code = code).values("user_id", "time_out", "is_trash"))
+        if check_code and not user[0]["is_trash"]:
             if user[0]["time_out"]:
                  return JsonResponse({'message': "Successfully logged in", 'success': True, 'user_id': user[0]["user_id"]})
             else:
-                return JsonResponse({'message': "The user is online", 'success': False})
-           
+                return JsonResponse({'message': "The user is online", 'success': False})   
         else:
             raise ValueError(f"{code} code doesn't exist!")
       
@@ -118,7 +117,6 @@ def get_user_details_edit_info(request, user_id):
         return JsonResponse({'message': "This user does not exist", 'success': False})
         
          
-   
     
 @csrf_exempt
 def edit_user(request, user_id):
@@ -149,14 +147,11 @@ def trash_user(request, user_id):
         if check_user_status[0]["time_out"]:
             user.is_trash = True
             user.save()
-            Trash.objects.create(user = user)
             return JsonResponse({'message': 'The user successfully deleted', 'success': True}, status=201)
         else:
             return JsonResponse({'message': 'The user is online', 'success': False})
     except ObjectDoesNotExist as e:
         return JsonResponse({'message': str(e), 'success': False}, status=404)
-    # except ValueError as e:
-    #     return JsonResponse({'message': str(e), 'success': False}, status=400)
 
 @csrf_exempt
 def get_all_trash(request):
@@ -184,7 +179,6 @@ def delete_user_permanently(request, user_id):
 @csrf_exempt
 def delete_all_user_permanently(request):
     confirmation = request.POST.get("confirmation")
-    print(confirmation)
     try:
         if confirmation == "attendance_hub_confirm_deletion":
              User.objects.filter(is_trash = True).delete()

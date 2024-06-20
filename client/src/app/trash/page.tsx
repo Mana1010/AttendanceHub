@@ -9,6 +9,7 @@ import axios from "axios";
 import { Payload } from "../attendance/page";
 import { toast } from "sonner";
 import Confirmation from "@/components/Confirmation";
+import Loading from "@/components/Loading";
 interface Trash {
   user_id: number;
   first_name: string;
@@ -57,7 +58,7 @@ function Trash() {
     },
   });
   if (getTrashes.isLoading) {
-    return <h1>Is Loading...</h1>;
+    return <Loading />;
   }
   const searchFilterName = trashData?.filter((user: Trash) =>
     new RegExp(searchName.trim(), "i").test(
@@ -176,6 +177,7 @@ function Trash() {
                         Restore
                       </button>
                       <button
+                        disabled={trashData?.length ? false : true}
                         onClick={() =>
                           deleteUserPermanently.mutate(user.user_id)
                         }

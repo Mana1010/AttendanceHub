@@ -19,7 +19,7 @@ const userSchema = z.object({
   firstname: z.string().min(1, "This field is required"),
   age: z.number().min(1, "This field is required").max(130),
   gender: z.enum(["Male", "Female", "LGBTQ+"]),
-  role: z.enum(["Student", "Staff", "Other"]),
+  role: z.enum(["Student", "Staff", "Others"]),
   reason: z.string().min(1, "This field is required"),
 });
 type UserSchema = z.infer<typeof userSchema>;

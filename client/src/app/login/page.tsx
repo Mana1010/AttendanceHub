@@ -14,14 +14,6 @@ function Login() {
   const router = useRouter();
   const [code, setCode] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-
-  // useEffect(() => {
-  //   function loadFunc(e: BeforeUnloadEvent) {
-  //     e.preventDefault();
-  //   }
-  //   window.addEventListener("beforeunload", loadFunc);
-  //   return () => window.removeEventListener("beforeunload", loadFunc);
-  // }, []);
   const enterCodeMutation = useMutation({
     mutationFn: async (code: string) => {
       const payload = new FormData();

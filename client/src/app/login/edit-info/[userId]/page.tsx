@@ -21,7 +21,7 @@ const userSchema = z.object({
   first_name: z.string().min(1, "This field is required"),
   age: z.number().min(1, "This field is required").max(130),
   gender: z.enum(["Male", "Female", "LGBTQ+"]),
-  role: z.enum(["Student", "Staff", "Other"]),
+  role: z.enum(["Student", "Staff", "Others"]),
   reason: z.string().min(1, "This field is required"),
 });
 type UserSchema = z.infer<typeof userSchema>;
@@ -72,6 +72,13 @@ function EditInfo({ params }: Params) {
       reset(getUserDetails.data);
     }
   }, [reset, getUserDetails.data]);
+  useEffect(() => {
+    function loadFunc(e: BeforeUnloadEvent) {
+      e.preventDefault();
+    }
+    window.addEventListener("beforeunload", loadFunc);
+    return () => window.removeEventListener("beforeunload", loadFunc);
+  }, []);
   if (getUserDetails.isLoading) {
     return <h1>...Loading</h1>;
   }
