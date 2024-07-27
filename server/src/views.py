@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import User, SessionLog, Trash
+from .models import User, SessionLog
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
